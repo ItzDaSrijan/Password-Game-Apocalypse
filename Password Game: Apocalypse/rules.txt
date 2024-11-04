@@ -1,6 +1,6 @@
-This is rule 01
-This is rule 02
-This is rule 03
+Password length must be at least 5 characters.
+Password must not contain letter {}/{}
+All digits in the password must add to 35.
 This is rule 04
 This is rule 05
 This is rule 06
