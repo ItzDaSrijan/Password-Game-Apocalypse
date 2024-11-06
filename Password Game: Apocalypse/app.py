@@ -13,6 +13,7 @@ import csv
 import random
 from tkinter import messagebox
 import os
+from PIL import Image
 
 # Initial Window
 window = ctk.CTk()
@@ -22,6 +23,9 @@ titlefont = ctk.CTkFont(family = "Helvetica", size = 40)
 entryfont = ctk.CTkFont(family = "Source Sans Pro", size = 20)
 rulesfont = ctk.CTkFont(family = "Source Sans Pro", size = 24)
 buttonfont = ctk.CTkFont(family = "Source Sans Pro", size = 30)
+
+# Variables
+backgroundimage = ctk.CTkImage(Image.open('bg.png'), size = (window.winfo_screenwidth(), window.winfo_screenheight()))
 
 # Functions
 def name(text, label):
@@ -151,6 +155,8 @@ def rulelabel(n, tup):
     rulelab.grid(row = 0, pady = 3, padx = 3)
     rules.after(25, lambda: rules._parent_canvas.yview_moveto(1.0))
 
+# checke
+# error when saving thru game win ig
 def savefunc(uid, uname, tup):
     passwordrn = passwordfield.get("1.0", "end-1c")
     found = 0
@@ -207,12 +213,16 @@ def startpage():
     
     window.title('Password Game: Apocalypse - Start')
     window.iconbitmap('icon.ico')
+    window.resizable(False, False)
     window.after(0, lambda: window.wm_state('zoomed'))
-    
+
     window.configure(fg_color = '#4B0082')
 
     window.grid_columnconfigure(0, weight=1)
     window.grid_rowconfigure(0, weight=1)
+
+    background = ctk.CTkLabel(window, image = backgroundimage, text = '')
+    background.grid(row = 0)
 
     mainframe = ctk.CTkFrame(window, fg_color = '#4B0082')
     mainframe.grid(row = 0)
@@ -223,7 +233,7 @@ def startpage():
     title = ctk.CTkLabel(titleframe, text = 'Password Game: Apocalypse', text_color = '#D3D3D3', font = titlefont)
     title.grid(row = 0)
 
-    hell = ctk.CTkLabel(titleframe, text = 'Welcome to Hell', font = ctk.CTkFont(family = "Helvetica", size = 30))
+    hell = ctk.CTkLabel(titleframe, text = 'Challenge Awaits!', font = ctk.CTkFont(family = "Helvetica", size = 30))
     hell.grid(row = 1, pady = 20)
 
     nameframe = ctk.CTkFrame(mainframe, fg_color = '#500666', border_width = 2, border_color = 'black')
@@ -272,12 +282,18 @@ def gamepage(username, userid, mode):
 
     window.title('Password Game: Apocalypse')
     window.iconbitmap('icon.ico')
+    window.resizable(False, False)
     window.after(0, lambda: window.wm_state('zoomed'))
 
     window.configure(fg_color = '#4B0082')
 
     window.grid_columnconfigure(0, weight=1)
     window.grid_rowconfigure(0, weight=1)
+
+    backgroundimage = ctk.CTkImage(Image.open('bg.png'), size = (window.winfo_screenwidth(), window.winfo_screenheight()))
+
+    background = ctk.CTkLabel(window, image = backgroundimage, text = '')
+    background.grid(row = 0)
 
     mainframe = ctk.CTkFrame(window, fg_color = '#4B0082')
     mainframe.grid(row = 0)
@@ -344,12 +360,9 @@ def gamepage(username, userid, mode):
     saved = ctk.CTkLabel(statsframe, text = '', font = entryfont, text_color = 'black')
     saved.grid(row = 3, padx = 20, pady = 5)
 
-    passwordfield = ctk.CTkTextbox(rightframe, fg_color = '#210447', border_width = 2, border_color = 'black', height = 100, width = 200, font = entryfont, scrollbar_button_color = 'black', scrollbar_button_hover_color = 'black')
+    passwordfield = ctk.CTkTextbox(rightframe, fg_color = '#210447', border_width = 2, border_color = 'black', height = 150, width = 200, font = entryfont, scrollbar_button_color = 'black', scrollbar_button_hover_color = 'black')
     passwordfield.grid(row = 1, padx = 20)
 
-    # checke
-    # doesnt add new rule ig and scroll stuff
-    # scrollbar appears so weird stuff happens and white thing, maybe scroll to bottom
     passwordfield.insert('0.0', passwordloaded)
 
     save = ctk.CTkButton(rightframe, text = 'Save Game', fg_color = '#360c6e', hover_color = '#230647', border_width = 3, border_color = 'black', font = buttonfont, command = lambda: savefunc(userid, username, tup))
