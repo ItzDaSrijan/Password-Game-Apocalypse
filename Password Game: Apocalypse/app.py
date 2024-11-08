@@ -5,7 +5,11 @@
 # add more parametrized random rules and check working
 # add warning for rules disappearing, add pw length
 # save rulesdisplayed and display them ig
-# nuitka
+# add progress bar or smth in gamepage for rules tracking
+# some rules display box where satisfied is green otherwise red
+# check wraplengths
+# make sure to save warning - more QOL messages and warnings here & there
+# nuitka, maybe use same window instead of destroying and creating new one coz C language will be faster
 
 # Importing
 import customtkinter as ctk
@@ -87,7 +91,9 @@ def checkrules(uname, uid, tup):
         pw = passwordfield.get("1.0", "end-1c")
         addrules(len(pw) > 4, 1, tup)
         addrules(tup[0] not in pw and tup[0].upper() not in pw, 2, tup)
-        addrules(sum(int(i) for i in pw if i.isdigit()) == 35, 3, tup)
+        # checke
+        # change > to ==
+        addrules(sum(int(i) for i in pw if i.isdigit()) > 35, 3, tup)
         addrules("4" in pw, 4, tup)
         addrules("5" in pw, 5, tup)
         addrules("6" in pw, 6, tup)
@@ -139,7 +145,7 @@ def checkrules(uname, uid, tup):
     else:
         for i in rulesflist:
             i.configure(fg_color = '#34eb37')
-        gameover(uname, uid)
+        gameover(uname, uid, tup)
 
 def rulelabel(n, tup):
     if n%2==0:
@@ -155,8 +161,6 @@ def rulelabel(n, tup):
     rulelab.grid(row = 0, pady = 3, padx = 3)
     rules.after(25, lambda: rules._parent_canvas.yview_moveto(1.0))
 
-# checke
-# error when saving thru game win ig
 def savefunc(uid, uname, tup):
     passwordrn = passwordfield.get("1.0", "end-1c")
     found = 0
@@ -200,9 +204,15 @@ def deletefunc(uid):
     os.rename('temp.csv', 'userdata.csv')
     window.destroy()
     
-def gameover(uname, uid):
+def gameover(uname, uid, tup):
     passwordfield.configure(state = 'disabled', text_color = 'gray')
-    savefunc(uid, uname)
+    savefunc(uid, uname, tup)
+    # checke
+    # don't write when loading a game that is won already
+    with open('pastwins.txt', 'a') as f:
+        f.write('\n'+passwordfield.get("1.0", "end-1c"))
+    # checke
+    # some alternative for messagebox I don't like how it looks
     messagebox.showinfo('Game Over', f'Congratulations! You successfully beat the game!\nUsername: {uname}\nUserID: {uid}\nThis game has been saved.'.format(uname, uid))
 
 # Pages
@@ -222,12 +232,16 @@ def startpage():
     window.grid_rowconfigure(0, weight=1)
 
     background = ctk.CTkLabel(window, image = backgroundimage, text = '')
-    background.grid(row = 0)
+    background.grid(row = 0, columnspan = 2)
 
     mainframe = ctk.CTkFrame(window, fg_color = '#4B0082')
-    mainframe.grid(row = 0)
+    mainframe.grid(row = 0, column = 0)
 
-    titleframe = ctk.CTkFrame(mainframe, fg_color = '#4B0082')
+    # Left
+    leftframe = ctk.CTkFrame(mainframe, fg_color = '#4B0082')
+    leftframe.grid(row = 0, column = 0)
+
+    titleframe = ctk.CTkFrame(leftframe, fg_color = '#4B0082')
     titleframe.grid(row = 0, padx = 30, pady = 20)
 
     title = ctk.CTkLabel(titleframe, text = 'Password Game: Apocalypse', text_color = '#D3D3D3', font = titlefont)
@@ -236,9 +250,11 @@ def startpage():
     hell = ctk.CTkLabel(titleframe, text = 'Challenge Awaits!', font = ctk.CTkFont(family = "Helvetica", size = 30))
     hell.grid(row = 1, pady = 20)
 
-    nameframe = ctk.CTkFrame(mainframe, fg_color = '#500666', border_width = 2, border_color = 'black')
+    nameframe = ctk.CTkFrame(leftframe, fg_color = '#500666', border_width = 2, border_color = 'black')
     nameframe.grid(row = 1, padx = 20)
 
+    # checke
+    # indicate won games differently
     L = ['New Game']
     try:
         with open('userdata.csv', 'r', newline = '') as f:
@@ -265,11 +281,29 @@ def startpage():
     enter = ctk.CTkButton(nameframe, text = 'Start', fg_color = '#360c6e', hover_color = '#230647', border_width = 2, border_color = 'black', font = buttonfont, command = lambda: name(namefield.get(), length))
     enter.grid(row = 4, padx = 20, pady = 20)
 
-    warning = ctk.CTkLabel(mainframe, font = ctk.CTkFont('Helvetica', 16), text = 'This game is supposed to be very hard and challenging.\nTry your best to not rage while playing this game.')
+    warning = ctk.CTkLabel(leftframe, font = ctk.CTkFont('Helvetica', 16), text = 'This game is supposed to be very hard and challenging.\nTry your best to not rage while playing this game.')
     warning.grid(row = 2, padx = 20, pady = 20)
 
-    opensource = ctk.CTkLabel(mainframe, text = 'https://github.com/ItzDaSrijan/Password-Game-Apocalypse')
+    opensource = ctk.CTkLabel(leftframe, text = 'https://github.com/ItzDaSrijan/Password-Game-Apocalypse')
     opensource.grid(row = 3, padx = 20, pady = 10)
+
+    # Right
+    pastwinsframe = ctk.CTkScrollableFrame(mainframe, label_text = 'Past Wins', label_fg_color = '#360c6e', label_font = ctk.CTkFont(family = "Source Sans Pro", size = 22), label_text_color = 'white', height = 400, width = 250, fg_color = '#6e078c', corner_radius = 5, border_width = 3, border_color = 'black', scrollbar_button_color = 'black', scrollbar_button_hover_color = 'black')
+    pastwinsframe.grid(row = 0, column = 1, padx = 20, pady = 20)
+
+    pastwinsframe.grid_columnconfigure(0, weight=1)
+
+    pastpasswords = []
+    try:
+        with open('pastwins.txt', 'r') as f:
+            pastpasswords = f.read().split()
+    except:
+        with open('pastwins.txt', 'w') as f:
+            pass
+        
+    for c, i in enumerate(pastpasswords):
+        pastpw = ctk.CTkLabel(pastwinsframe, text = i, fg_color = '#450657', font = rulesfont, corner_radius = 5, wraplength = 210, padx = 5, pady = 5)
+        pastpw.grid(row = c, pady = 10)
 
 def gamepage(username, userid, mode):
     global window, passwordfield, rules, rules_list, satisfied, completed, notcompleted, rules_displayed, rulesflist, saved, save
@@ -360,6 +394,8 @@ def gamepage(username, userid, mode):
     saved = ctk.CTkLabel(statsframe, text = '', font = entryfont, text_color = 'black')
     saved.grid(row = 3, padx = 20, pady = 5)
 
+    # checke
+    # try to get scrollbar always so no weird bug thing when scrollbar appears naturally
     passwordfield = ctk.CTkTextbox(rightframe, fg_color = '#210447', border_width = 2, border_color = 'black', height = 150, width = 200, font = entryfont, scrollbar_button_color = 'black', scrollbar_button_hover_color = 'black')
     passwordfield.grid(row = 1, padx = 20)
 
