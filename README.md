@@ -1,3 +1,4 @@
+# looking at the code there's a lot of work left and the game is not complete, I don't plan on completing it either.
 
 ![Logo](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/th5xamgrr6se0x5ro4g6.png)
 
